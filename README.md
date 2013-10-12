@@ -52,7 +52,7 @@ but the easiest way is to use the readily-available [binary releases]:
       open shells might still be using the socket.
     * Usage of `eval` to load the environment variables is the usual approach.
       By default, ssh-pageant outputs sh-style commands.  Use the `-c` option
-      for csh-style commands.
+      for csh-style commands or `-x` option to use setx.
     * To share the socket between Cygwin and [msysgit/MinGW](http://msysgit.github.io/),
       ensure to use a path that resolves to the same location in both
       environments via `cygpath --windows {path}`
@@ -74,6 +74,7 @@ unnecessary with the `--reuse` option.
       -v, --version  Display version information.
       -c             Generate C-shell commands on stdout.
       -s             Generate Bourne shell commands on stdout. (default)
+      -x             Generate Windows commands on stdout.
       -k             Kill the current ssh-pageant.
       -d             Enable debug mode.
       -q             Enable quiet mode.

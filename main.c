@@ -316,6 +316,7 @@ main(int argc, char *argv[])
     int opt_reuse = 0;
     int opt_lifetime = 0;
     int opt_csh = !!strstr(getenv("SHELL") ?: "", "csh");
+    int opt_setx = 0;
 
     while ((opt = getopt_long(argc, argv, "+hvcskdqa:rt:",
                               long_options, NULL)) != -1)
@@ -327,6 +328,7 @@ main(int argc, char *argv[])
                 printf("  -v, --version  Display version information.\n");
                 printf("  -c             Generate C-shell commands on stdout.\n");
                 printf("  -s             Generate Bourne shell commands on stdout. (default)\n");
+                printf("  -x             Generate Windows commands on stdout.\n");
                 printf("  -k             Kill the current %s.\n", prog);
                 printf("  -d             Enable debug mode.\n");
                 printf("  -q             Enable quiet mode.\n");
@@ -351,6 +353,10 @@ main(int argc, char *argv[])
 
             case 's':
                 opt_csh = 0;
+                break;
+
+            case 'x':
+                opt_setx = 1;
                 break;
 
             case 'k':
@@ -397,7 +403,11 @@ main(int argc, char *argv[])
         pid = atoi(pidenv);
         if (kill(pid, SIGTERM) < 0)
             err(1, "kill(%d)", pid);
-        if (opt_csh) {
+        if (opt_setx) {
+            printf("setx SSH_AUTH_SOCK \"\"\n");
+            printf("setx SSH_PAGEANT_PID \"\"\n");
+        }
+        else if (opt_csh) {
             printf("unsetenv SSH_AUTH_SOCK;\n");
             printf("unsetenv SSH_PAGEANT_PID;\n");
         }
@@ -450,7 +460,12 @@ main(int argc, char *argv[])
         if (pid < 0)
             cleanup_warn("fork");
         if (pid > 0) {
-            if (opt_csh) {
+            if (opt_setx) {
+                printf("setx SSH_AUTH_SOCK %s\n", sockpath);
+                if (p_set_pid_env)
+                    printf("setx SSH_PAGEANT_PID %d\n", pid);
+            }
+            else if (opt_csh) {
                 printf("setenv SSH_AUTH_SOCK %s;\n", sockpath);
                 if (p_set_pid_env)
                     printf("setenv SSH_PAGEANT_PID %d;\n", pid);
